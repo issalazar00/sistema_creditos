@@ -13,7 +13,7 @@ class HeadquarterController extends Controller
 	{
 		$this->middleware('permission:headquarter.index', ['only' => ['index', 'show', 'listHeadquarter', 'listAllHeadquarters']]);
 		$this->middleware('permission:headquarter.store', ['only' => ['store']]);
-		$this->middleware('permission:headquarter.update', ['only' => ['update', 'create']]);
+		$this->middleware('permission:headquarter.update', ['only' => ['update']]);
 		$this->middleware('permission:headquarter.status', ['only' => ['changeStatus']]);
 	}
 	/**
@@ -135,30 +135,34 @@ class HeadquarterController extends Controller
 			'address' => 'nullable|string',
 			'nit' => 'nullable|string',
 			'email' => 'required|email:rfc,dns|unique:users|max:255',
-			'legal_representative' => 'required|string'
+			'legal_representative' => 'required|string',
+			'phone' => 'nullable'
 		]);
-		if (!$request->fails()) {
+
+		if ($validate->fails()) {
+			return response()->json([
+				'status' => 'error',
+				'code' =>  400,
+				'message' => 'Validación de datos incorrecta',
+				'errors' =>  $validate->errors()
+			], 400);
+		}
+		if (!$validate->fails()) {
+			$headquarter = Headquarter::findOrFail($request->id);
 			$headquarter->headquarter = $request['headquarter'];
 			$headquarter->address = $request['address'];
 			$headquarter->nit = $request['nit'];
 			$headquarter->email = $request['email'];
 			$headquarter->legal_representative = $request['legal_representative'];
 			$headquarter->pos_printer = $request['pos_printer'];
-			$headquarter->phone = $request['phone'];
-			$headquarter->save();
+			$headquarter->phone = $request->phone;
+			$headquarter->update();
 
 			$data = [
 				'status' => 'success',
 				'code' => 200,
 				'message' => 'Registro exitoso',
 				'headquarter' => $headquarter
-			];
-		} else {
-			$data = [
-				'status' => 'error',
-				'code' =>  400,
-				'message' => 'Validación de datos incorrecta',
-				'errors' =>  $validate->errors()
 			];
 		}
 		return response()->json($data, $data['code']);
