@@ -330,6 +330,7 @@ class CreditController extends Controller
 			if ($request->status  == 1) {
 				$update_main_box = new MainBoxController();
 				$update_main_box->subAmountMainBox($credit->credit_value);
+				$credit->disbursement_date = date('Y-m-d');
 			}
 			if ($request->status  == 2 && $credit->status == 1) {
 				$update_main_box = new MainBoxController();

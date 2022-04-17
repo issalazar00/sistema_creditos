@@ -174,6 +174,9 @@ export default {
     },
 
     changeStatus: function (id, status) {
+       var data = {
+          status: status,
+        };
       Swal.fire({
         title: "¿Quieres cambiar el estado del credito?",
         showCancelButton: true,

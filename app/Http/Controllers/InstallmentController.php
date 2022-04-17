@@ -267,14 +267,15 @@ class InstallmentController extends Controller
       }
     }
     if (!$quote) {
-      $this->updateInstallments($credit);
+      $this->updateInstallments($credit->id);
     }
 
     return ['balance' => $balance, 'no_installment' => $no_installment, 'entry_id' => $entry_id];
   }
 
-  public function updateInstallments(Credit $credit)
+  public function updateInstallments($credit_id)
   {
+    $credit = Credit::findOrFail($credit_id);
     $capital = $credit->credit_value - $credit->capital_value;
     $installments = $credit->installments()
       ->where('status', 0)

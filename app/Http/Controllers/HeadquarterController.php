@@ -66,7 +66,6 @@ class HeadquarterController extends Controller
 		if (!$validate->fails()) {
 			$headquarter = new Headquarter();
 			$headquarter->headquarter = $request['headquarter'];
-			$headquarter->status = 1;
 			$headquarter->address = $request['address'];
 			$headquarter->nit = $request['nit'];
 			$headquarter->email = $request['email'];
@@ -131,7 +130,6 @@ class HeadquarterController extends Controller
 
 		$validate = Validator::make($request->all(), [
 			'headquarter' => 'required|string|min:3|max:50',
-			'status' => 'required|boolean',
 			'address' => 'nullable|string',
 			'nit' => 'nullable|string',
 			'email' => 'required|email:rfc,dns|unique:users|max:255',
