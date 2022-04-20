@@ -106,7 +106,6 @@ class ExpenseController extends Controller
 		$sub_amount_box = new BoxController();
 		$sub_amount_box->subAmountBox($box->id, $request['price']);
 
-
 		return response()->json([
 			'status' => 'success',
 			'code' =>  200,
@@ -124,13 +123,11 @@ class ExpenseController extends Controller
 	 */
 	public function update(Request $request, Expense $expense)
 	{
-
 		$validate = Validator::make($request->all(), [
 			'description' => 'required|string|max:255',
 			'date' => 'required|date',
 			'type_output' => 'required|string|exists:type_expenses,description',
 		]);
-
 
 		if ($validate->fails()) {
 			return response()->json([

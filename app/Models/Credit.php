@@ -67,4 +67,10 @@ class Credit extends Model
     {
         return $this->belongsTo(Provider::class, 'provider_id');
     }
+
+    public function credit_provider()
+    {
+        return $this->hasOne(CreditProvider::class);
+    }
+
 }

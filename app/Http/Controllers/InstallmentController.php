@@ -175,7 +175,7 @@ class InstallmentController extends Controller
     $amount_receipt = $amount;
     $now = now();
     $status = 0;
-
+    
     $installment = $credit->installments();
     if (!$quote) {
       $installment = $installment->whereDate('payment_date', '<=', $now);
@@ -216,9 +216,9 @@ class InstallmentController extends Controller
       if ($payment_date >= $now) {
         //primer pago
         $status = 1;
+        $amount_capital = $amount -  $installment->interest_value; //ok
+        $interest = $installment->interest_value;
         if ($installment->paid_balance == null || $installment->paid_balance == 0) {
-          $amount_capital = $amount -  $installment->interest_value; //ok
-          $interest = $installment->interest_value;
           if ($amount_capital + 1 < $installment->capital_value) {
             $status = 0;
           }
@@ -235,7 +235,7 @@ class InstallmentController extends Controller
       //Cuando el cliente paga después de la fecha programada
       if ($payment_date < $now) {
         $days_past_due = $now->diffInDays($payment_date);
-
+        
         $day_value_default = $installment->interest_value / 30;
         $late_interests_value =  $days_past_due > 30 ?  $day_value_default * 30 : $day_value_default * $days_past_due;
         $installment->days_past_due  = $days_past_due > 30 ? 30 : $days_past_due;
@@ -256,15 +256,13 @@ class InstallmentController extends Controller
       $installment->status  = $status;
       $installment->payment_register = date('Y-m-d');
 
-      if ($installment->save()) {
-
-        $credit_paid = new CreditController;
-        $credit_paid->updateValuesCredit($credit->id, $amount, $amount_capital, $interest);
-
-        $entry_id =  $this->saveEntryInstallment($credit, $amount_receipt, $amount_capital + $interest, $no_installment, $balance, $user_id, $quote);
-      } else {
-        return false;
-      }
+      if (!$installment->save()) {
+        return false;        
+      } 
+      $credit_paid = new CreditController;
+      $credit_paid->updateValuesCredit($credit->id, $amount, $amount_capital, $interest);
+      $entry_id =  $this->saveEntryInstallment($credit, $amount_receipt, $amount_capital + $interest, $no_installment, $balance, $user_id, $quote);
+      
     }
     if (!$quote) {
       $this->updateInstallments($credit->id);
@@ -370,7 +368,6 @@ class InstallmentController extends Controller
       $entry->type_entry = $type_entry;
       $entry->price = $amount;
       $entry->save();
-
       return  $entry->id;
     }
   }

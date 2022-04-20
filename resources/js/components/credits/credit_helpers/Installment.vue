@@ -108,9 +108,6 @@ export default {
         amount: quote.value,
         quote_id: quote.id,
       };
-
-      console.log(quote.value);
-
       if (quote.value > 0) {
         axios
           .post(
@@ -119,8 +116,8 @@ export default {
             me.$root.config
           )
           .then(function (response) {
+            //me.printEntryPdf(response.data.entry_id);
             me.listCreditInstallments(me.id_credit, 1);
-            me.printEntryPdf(response.data.entry_id);
           });
       } else {
         Swal.fire({
@@ -130,19 +127,21 @@ export default {
         });
       }
     },
-    printEntryPdf(entry_id) {
-      axios
+    printEntryPdf: async function (entry_id) {
+      try {
+        const resp = await axios
         .get(`api/entries/show-entry/${entry_id}`, this.$root.config)
         .then((response) => {
           const pdf = response.data.pdf;
           var a = document.createElement("a");
           a.href = "data:application/pdf;base64," + pdf;
           a.download = `entrada_${entry_id}-${Date.now()}.pdf`;
-          a.target = "_blank"
+          a.target = "_blank";
           a.click();
-          console.log(a);
-
         });
+      } catch (error) {
+        console.log(error)
+      }
     },
   },
 };

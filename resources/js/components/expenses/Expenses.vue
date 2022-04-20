@@ -102,7 +102,18 @@
               <td>{{ e.user.name }} {{ e.user.last_name }}</td>
               <td>{{ e.date }}</td>
               <td>{{ e.type_output }}</td>
-              <td class="wrap">{{ e.description }}</td>
+              <td class="wrap">
+                <textarea
+                  name=""
+                  class="form-control-plaintext"
+                  readonly
+                  id=""
+                  cols="7"
+                  rows="4"
+                  v-model="e.description"
+                >
+                </textarea>
+                </td>
               <td class="text-right">{{ e.price | currency }}</td>
               <td
                 class="text-right"

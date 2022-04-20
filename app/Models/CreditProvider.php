@@ -33,7 +33,7 @@ class CreditProvider extends Model
 
 	public function credit()
 	{
-		return $this->belongsTo(Credit::class);
+		return $this->belongsTo(Credit::class, 'credit_id');
 	}
 
 	public function provider()

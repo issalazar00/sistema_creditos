@@ -109,7 +109,7 @@ export default {
             this.$root.config
           )
           .then((response) => {
-            me.printEntryPdf(response.data.entry_id);
+            this.printEntryPdf(response.data.entry_id);
           })
           .finally(
             this.$refs.Installment.listCreditInstallments(
@@ -139,19 +139,23 @@ export default {
           a.download = `credit_${this.id_credit}-${Date.now()}.pdf`;
           a.target = "_blank"
           a.click();
-          console.log(a);
         });
     },
-    printEntryPdf(entry_id) {
-      axios
+    printEntryPdf: async function (entry_id) {
+      try {
+        const resp = await axios
         .get(`api/entries/show-entry/${entry_id}`, this.$root.config)
         .then((response) => {
           const pdf = response.data.pdf;
           var a = document.createElement("a");
           a.href = "data:application/pdf;base64," + pdf;
           a.download = `entrada_${entry_id}-${Date.now()}.pdf`;
+          a.target = "_blank";
           a.click();
         });
+      } catch (error) {
+        
+      }
     },
   },
 };

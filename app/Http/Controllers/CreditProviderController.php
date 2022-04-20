@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Box;
 use App\Models\CreditProvider;
+use App\Models\Expense;
 use App\Models\MainBox;
 use Illuminate\Http\Request;
 
@@ -12,10 +13,10 @@ class CreditProviderController extends Controller
 
 	public function __construct()
 	{
-			$this->middleware('permission:provider.index', ['only' => ['index','show']]);
-			$this->middleware('permission:provider.store', ['only' => ['store']]);
-			$this->middleware('permission:provider.update', ['only' => ['update','payCreditProvider']]);
-			$this->middleware('permission:provider.delete', ['only' => ['destroy']]);
+		$this->middleware('permission:provider.index', ['only' => ['index', 'show']]);
+		$this->middleware('permission:provider.store', ['only' => ['store']]);
+		$this->middleware('permission:provider.update', ['only' => ['update', 'payCreditProvider']]);
+		$this->middleware('permission:provider.delete', ['only' => ['destroy']]);
 	}
 	/**
 	 * Display a listing of the resource.
@@ -61,8 +62,9 @@ class CreditProviderController extends Controller
 	public function payCreditProvider(CreditProvider $credit_provider, Request $request)
 	{
 
+$user = $request->user();
 		$data = ([
-			'Asesor' => 'Richard Peña',
+			'Asesor' => "$user->name $user->last_name",
 			'Fecha' => date('Y-m-d'),
 			'Monto' => $request['amount']
 		]);
@@ -76,8 +78,26 @@ class CreditProviderController extends Controller
 		$credit_provider->paid_value = $credit_provider->paid_value + $request['amount'];
 		$credit_provider->pending_value = $credit_provider->pending_value - $request['amount'];
 		$credit_provider->history = json_encode($history);
-
 		$credit_provider->save();
+
+		$credit = $credit_provider->credit()->first();
+		$client = $credit->client()->first();
+		$provider = $credit->provider()->first();
+
+		$expense =  new Expense();
+		$expense->headquarter_id = $request->user()->headquarter_id;
+		$expense->user_id = $request->user()->id;
+		$expense->status = 1;
+		$expense->description = "Abono a proveedor\n" .
+		"#Credito proveedor:  $credit_provider->id \n" .
+		"#Credito:  $credit->id \n" .
+		"#Cliente:  $client->name $client->last_name  \n".
+		"#Proveedor:  $provider->business_name \n";
+
+		$expense->date = date('Y-m-d');
+		$expense->type_output = 'Pago a proveedor';
+		$expense->price = $request['amount'];
+		$expense->save();
 
 		$update_main_box = new MainBoxController();
 		$update_main_box->subAmountMainBox($request['amount']);
