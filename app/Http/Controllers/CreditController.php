@@ -55,6 +55,7 @@ class CreditController extends Controller
 		}
 		$credits = $credits
 			->orderBy('id', 'desc')
+			->with('headquarter:id,headquarter')
 			->paginate(10);
 		return $credits;
 	}

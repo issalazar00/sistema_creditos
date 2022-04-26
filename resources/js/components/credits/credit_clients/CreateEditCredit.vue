@@ -177,7 +177,7 @@
 									>
 								</div>
 								<div class="form-group col-md-4">
-									<label for="credit_value">Valor Credito</label>
+									<label for="credit_value">Valor Credito: <b>{{formCredit.credit_value | currency}}</b></label>
 									<input
 										v-if="edit"
 										type="text"
@@ -186,8 +186,7 @@
 										step="any"
 										:value="formCredit.credit_value | currency"
 										:disabled="edit"
-										:class="[formErrors.credit_value ? 'is-invalid' : '']"
-										placeholder="Ingresar valor de crédito"
+										:class="[formErrors.credit_value ? 'is-invalid' : '']"										
 									/>
 									<input
 										v-if="!edit"
@@ -226,6 +225,7 @@
 										:disabled="edit"
 										:class="[formErrors.interest ? 'is-invalid' : '']"
 										placeholder="Ingresar interés"
+										value="3"
 									/>
 									<small id="interest_help" class="form-text text-danger">{{
 										formErrors.interest

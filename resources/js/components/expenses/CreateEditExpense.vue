@@ -81,7 +81,7 @@
           />
         </div>
         <div class="form-group col-12">
-          <label for="price">Precio</label>
+          <label for="price">Precio: <b>{{ formExpense.price | currency}} </b></label>
           <input
             type="number"
             step="any"

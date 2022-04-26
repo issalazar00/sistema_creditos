@@ -26,7 +26,7 @@
           >
             <div class="form-row w-100">
               <div class="form-group col-2">
-                <label for="amount">Monto a pagar</label>
+                <label for="amount">Monto a pagar:  <b>{{  amount_value | currency }}</b></label>
               </div>
               <div class="form-group col-4">
                 <input
@@ -49,7 +49,7 @@
                   @click="payCredit()"
                   v-if="amount_value > min_amount"
                 >
-                  <i class="bi bi-currency-dollar"></i> Abonar a crédito
+                   Abonar  <b>{{  amount_value | currency }}</b>
                 </button>
                 <button v-else class="btn btn-secondary my-auto" disabled>
                   <i class="bi bi-currency-dollar"></i> Abonar a crédito

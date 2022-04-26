@@ -90,7 +90,7 @@
 				</div>
 				<div class="form-group row col-md-6 h5">
 					<label for="saldo_inicial" class="col-sm-4 col-form-label"
-						>Añadir saldo</label
+						>Añadir saldo: <b>{{ add_amount | currency}}</b></label
 					>
 					<div class="col-sm-8">
 						<input

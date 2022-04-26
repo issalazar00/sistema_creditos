@@ -20,8 +20,7 @@
             id="search_client"
             name="search_client"
             class="form-control col"
-            placeholder="Buscar cliente | Documento"
-            @keyup="listCredits()"
+            placeholder="Buscar cliente | Documento"            
             v-model="search_client"
           />
         </div>
@@ -31,7 +30,7 @@
             id="status"
             v-model="status"
             class="custom-select col"
-            @click="listCredits()"
+            
           >
             <option
               v-for="(st, index) in creditStatus"
@@ -41,6 +40,9 @@
               {{ st }}
             </option>
           </select>
+        </div>
+        <div class="col">
+          <button class="btn btn-primary" @click="listCredits()">Buscar</button>
         </div>
       </div>
     </div>
@@ -52,6 +54,7 @@
             <tr class="text-center">
               <th>ID</th>
               <th>Cliente</th>
+              <th>Sede</th>
               <th>Nro. Documento</th>
               <th>Descripción</th>
               <th>Valor crédito</th>
@@ -83,6 +86,7 @@
             <tr v-for="credit in creditList.data" :key="credit.index">
               <td>{{ credit.id }}</td>
               <td>{{ credit.name }} {{ credit.last_name }}</td>
+              <td>{{  credit.headquarter.headquarter }}</td>
               <td>{{ credit.type_document }} {{ credit.document }}</td>
               <td>
                 <textarea

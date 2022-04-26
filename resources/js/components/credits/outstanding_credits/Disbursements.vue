@@ -35,6 +35,7 @@
             <tr class="text-center">
               <th>ID</th>
               <th>Cliente</th>
+              <th>Sede</th>
               <th>Nro. Documento</th>
               <th>Valor crédito</th>
               <th>Valor Abonado</th>
@@ -52,6 +53,7 @@
             <tr v-for="credit in creditList.data" :key="credit.index">
               <td>{{ credit.id }}</td>
               <td>{{ credit.name }} {{ credit.last_name }}</td>
+              <td>{{  credit.headquarter.headquarter }}</td>
               <td>{{ credit.document }}</td>
               <td class="text-right">{{ credit.credit_value | currency }}</td>
               <td class="text-right">{{ credit.paid_value | currency }}</td>

@@ -61,7 +61,12 @@
                 </td>
               </tr>
               <tr class="text-center">
-                <td colspan="3">
+                 <td>
+                  <strong>Sede: </strong>
+
+                  {{ CreditInformation.headquarter.headquarter }}
+                </td>
+                <td colspan="2">
                   <strong>Descripción: </strong>
 
                   {{ CreditInformation.description }}

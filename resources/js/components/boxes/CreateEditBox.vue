@@ -90,7 +90,7 @@
 								</select>
 							</div>
 							<div class="form-group">
-								<label for="add_amount">Añadir saldo</label>
+								<label for="add_amount">Añadir saldo: <b>{{ add_amount | currency}}</b></label>
 								<input
 									type="number"
 									step="any"

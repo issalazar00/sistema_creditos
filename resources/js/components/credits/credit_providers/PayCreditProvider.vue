@@ -49,7 +49,7 @@
               />
             </div>
             <div class="form-group">
-              <label for="add_amount">Abonar</label>
+              <label for="add_amount">Abonar: <b>{{ add_amount | currency}} </b></label>
               <input
                 type="number"
                 step="any"
