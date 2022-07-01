@@ -62,7 +62,7 @@ class CreditProviderController extends Controller
 	public function payCreditProvider(CreditProvider $credit_provider, Request $request)
 	{
 
-$user = $request->user();
+		$user = $request->user();
 		$data = ([
 			'Asesor' => "$user->name $user->last_name",
 			'Fecha' => date('Y-m-d'),
@@ -89,10 +89,10 @@ $user = $request->user();
 		$expense->user_id = $request->user()->id;
 		$expense->status = 1;
 		$expense->description = "Abono a proveedor\n" .
-		"#Credito proveedor:  $credit_provider->id \n" .
-		"#Credito:  $credit->id \n" .
-		"#Cliente:  $client->name $client->last_name  \n".
-		"#Proveedor:  $provider->business_name \n";
+			"#Credito proveedor:  $credit_provider->id \n" .
+			"#Credito:  $credit->id \n" .
+			"#Cliente:  $client->name $client->last_name  \n" .
+			"#Proveedor:  $provider->business_name \n";
 
 		$expense->date = date('Y-m-d');
 		$expense->type_output = 'Pago a proveedor';

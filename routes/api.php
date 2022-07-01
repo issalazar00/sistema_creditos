@@ -122,6 +122,8 @@ Route::group(['middleware' => ['auth:api']], function () {
 	//Installments
 	Route::resource('/installments', InstallmentController::class);
 	Route::post('/installment/{credit}/pay-installment', [InstallmentController::class, 'payInstallment']);
+	Route::post('/installment/reverse-payment/{id}', [InstallmentController::class, 'reversePaymentInstallment']);
+	
 
 	//Print ticket
 	Route::get('/print-installment', [PrintTicketController::class, 'printInstallment']);

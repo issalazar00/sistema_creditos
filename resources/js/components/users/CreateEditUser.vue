@@ -117,7 +117,7 @@
                 <div class="form-group col-md-4">
                   <label for="document">Nro. Documento</label>
                   <input
-                    type="number"
+                    type="text"
                     class="form-control"
                     id="document"
                     v-model="formUser.document"

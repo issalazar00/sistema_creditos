@@ -355,11 +355,13 @@ class CreditController extends Controller
 			$payment_date = Carbon::createFromFormat('Y-m-d', $installment->payment_date);
 
 			if ($payment_date < $now) {
-				$days_past_due = $now->diffInDays($payment_date);
+				$days_past_due = $installment->days_past_due ? $installment->days_past_due :  $now->diffInDays($payment_date);
 				$day_value_default = $installment->interest_value / 30;
-				$late_interests_value =  $days_past_due > 30 ?  $day_value_default * 30 : $day_value_default * $days_past_due;
+				$late_interests_actual =  $days_past_due > 30 ?  $day_value_default * 30 : $day_value_default * $days_past_due;
+				$late_interests_value = $installment->late_interests_value ? $installment->late_interests_value : $late_interests_actual;
+
 				$installment->days_past_due  = $days_past_due > 30 ? 30 : $days_past_due;
-				$installment->late_interests_value  = $late_interests_value;
+				$installment->late_interests_value  =  $late_interests_value;
 				if ($installment->paid_capital > 0 && $installment->paid_capital < $installment->capital_value) {
 					$installment->value = $installment->capital_value - $installment->paid_capital;
 				} else {

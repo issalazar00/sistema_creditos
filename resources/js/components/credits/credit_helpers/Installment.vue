@@ -15,6 +15,7 @@
           <th>Capital abonado</th>
           <th v-if="allow_payment">Estado</th>
           <th v-if="allow_payment"></th>
+          <th>Reversar <br /> Pago</th>
         </tr>
       </thead>
       <tbody>
@@ -46,29 +47,22 @@
             {{ quote.paid_capital | currency }}
           </td>
           <td v-if="allow_payment">
-            <span
-              v-if="quote.status == 0"
-              class="badge badge-pill badge-warning"
-              >Pendiente</span
-            >
-            <span
-              v-if="quote.status == 1"
-              class="badge badge-pill badge-success"
-              >Pagado</span
-            >
+            <span v-if="quote.status == 0" class="badge badge-pill badge-warning">Pendiente</span>
+            <span v-if="quote.status == 1" class="badge badge-pill badge-success">Pagado</span>
           </td>
           <td v-if="allow_payment">
-            <button
-              @click="payInstallment(quote)"
-              type="button"
-              class="btn btn-sm btn-success"
-              v-if="quote.status == 0"
-            >
+            <button @click="payInstallment(quote)" type="button" class="btn btn-sm btn-success"
+              v-if="quote.status == 0">
               Pagar
             </button>
 
             <button v-else class="btn btn-sm btn-secondary" disabled>
               Pagar
+            </button>
+          </td>
+          <td>
+            <button class="btn btn-warning" @click="reversePayment(quote)">
+              <i class="bi bi-arrow-counterclockwise"></i>
             </button>
           </td>
         </tr>
@@ -130,19 +124,41 @@ export default {
     printEntryPdf: async function (entry_id) {
       try {
         const resp = await axios
-        .get(`api/entries/show-entry/${entry_id}`, this.$root.config)
-        .then((response) => {
-          const pdf = response.data.pdf;
-          var a = document.createElement("a");
-          a.href = "data:application/pdf;base64," + pdf;
-          a.download = `entrada_${entry_id}-${Date.now()}.pdf`;
-          a.target = "_blank";
-          a.click();
-        });
+          .get(`api/entries/show-entry/${entry_id}`, this.$root.config)
+          .then((response) => {
+            const pdf = response.data.pdf;
+            var a = document.createElement("a");
+            a.href = "data:application/pdf;base64," + pdf;
+            a.download = `entrada_${entry_id}-${Date.now()}.pdf`;
+            a.target = "_blank";
+            a.click();
+          });
       } catch (error) {
         console.log(error)
       }
     },
+    reversePayment(quote) {
+      axios.post(`api/installment/reverse-payment/${quote.id}`, null, this.$root.config)
+        .then(function (response) {
+          // handle success
+          Swal.fire({
+            icon: "success",
+            title: ".",
+            text: "La operación se ha realizado correctamente",
+          });
+          this.listCreditInstallments(this.id_credit, 1)
+        })
+        .catch(function (error) {
+          // handle error
+          if (error) {
+            Swal.fire({
+              icon: "error",
+              title: "Oops...",
+              text: "No se pudo realizar esta operación",
+            });
+          }
+        })
+    }
   },
 };
 </script>

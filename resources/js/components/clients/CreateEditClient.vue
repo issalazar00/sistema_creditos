@@ -83,7 +83,7 @@
             <label for="Apellidos">Nro. Documento</label>
 
             <input
-              type="number"
+              type="text"
               class="form-control"
               id="Documento"
               v-model="formClient.document"

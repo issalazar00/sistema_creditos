@@ -54,7 +54,7 @@ class ExpenseController extends Controller
 			$expenses =	$expenses->where('description', 'LIKE', "%$description%");
 		}
 		$expenses =	$expenses->paginate(15);
-		
+
 		return $expenses;
 	}
 
@@ -175,5 +175,19 @@ class ExpenseController extends Controller
 		];
 
 		return response()->json($data);
+	}
+
+	public function addExpense($user_id, $headquarter_id, $description, $date, $type_output, $price)
+	{
+		$expense =  new Expense();
+		$expense->headquarter_id = $headquarter_id;
+		$expense->user_id = $user_id;
+		$expense->status = 1;
+		$expense->description = $description;
+		$expense->date = $date;
+		$expense->type_output = $type_output;
+		$expense->price = $price;
+		$expense->save();
+
 	}
 }

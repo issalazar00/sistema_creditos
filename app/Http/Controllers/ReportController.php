@@ -102,7 +102,8 @@ class ReportController extends Controller
 				});
 		}
 
-		$credits = $credits->paginate(15);
+		$credits = $credits
+			->with('client:id,name,last_name')->paginate(15);
 		$total_credits = new CreditController;
 		$total_credits = $total_credits->getTotalValueCredits($request);
 
