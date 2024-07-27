@@ -114,6 +114,7 @@ class InstallmentController extends Controller
     $amount = $request->amount;
     $capital = (float)0;
     $interest = (float) 0;
+    $additional_interest = (float) 0;
     $late_interest = (float) 0;
     $balance = (float) $amount + 0;
     $step = 0;
@@ -124,7 +125,7 @@ class InstallmentController extends Controller
     $installment = $credit->installments()
       ->where(function ($query) use ($late_interest_pending) {
         $query
-          ->whereRaw("((paid_balance - paid_capital)) < ((interest_value)+$late_interest_pending)")
+          ->whereRaw("((paid_balance - paid_capital)) < ((interest_value)+additional_interest_value+$late_interest_pending)")
           ->orWhereNull('paid_balance');
       })
       ->where('status', 0)
@@ -143,7 +144,7 @@ class InstallmentController extends Controller
       $installment = $credit->installments()
         ->where(function ($query) {
           $query
-            ->whereRaw('(paid_balance-paid_capital-interest_value)>0.1');
+            ->whereRaw('(paid_balance-paid_capital-interest_value-additional_interest_value)>0.1');
         })
         ->where('status', 0)
         ->first();
@@ -161,17 +162,30 @@ class InstallmentController extends Controller
           if ((int)$balance > (int) $helpPendingCapital) {
             $capital = $helpPendingCapital;
             $balance = $balance - $capital;
-            $helpPendingInterest = $installment->interest_value - ($installment->paid_balance - $installment->paid_capital);
+            $paidInterest = $installment->paid_balance - $installment->paid_capital;
+            $helpPendingInterest = $installment->interest_value - ($paidInterest);
+            $helpPendingInterestAditional =   round($installment->additional_interest_value - ($paidInterest), 5);
+            $helpPendingTotalInterest = $helpPendingInterest + $helpPendingInterestAditional;
 
-            if ((int) $balance >= (int)  $helpPendingInterest) {
+            if ((int) $balance >= (int)$helpPendingTotalInterest) {
               $interest =  $helpPendingInterest;
-              $balance = $balance - $interest;
+              $additional_interest =  $helpPendingInterestAditional;
+              $balance = $balance - $helpPendingTotalInterest;
               $status = 1;
               $step = 3;
             } else {
-              $interest = $balance;
-              $balance = $balance - $interest;
-              $step = 4;
+              if ((int) $balance >= (int)  $helpPendingInterest) {
+                //15300, 8300, 7000
+                $interest =  $helpPendingInterest;
+                $additional_interest =  $balance - $interest;
+                $balance = $balance - ($interest + $additional_interest);
+                $step = 20;
+              } else {
+                $interest = $balance;
+                $balance = $balance - $interest;
+                $additional_interest =  $helpPendingInterestAditional;
+                $step = 4;
+              }
             }
           } else {
             $capital = $balance;
@@ -229,8 +243,9 @@ class InstallmentController extends Controller
       }
 
       $installment->payment_register = date('Y-m-d');
-      $installment->paid_balance +=  ($capital + $interest + $late_interest);
+      $installment->paid_balance +=  ($capital + $interest + $late_interest + $additional_interest);
       $installment->paid_capital += $capital;
+      $installment->additional_interest_paid += $additional_interest;
       $installment->late_interests_value += $late_interest;
       $installment->status = $status;
       $installment->collected_by = $user_id;
@@ -245,6 +260,7 @@ class InstallmentController extends Controller
       }
       $credit_paid = new CreditController;
       $request->merge(['user_id' => $user_id]);
+      $request->merge(['additional_interest' => $additional_interest]);
       $credit_paid->updateValuesCredit(
         $request,
         $credit->id,
@@ -252,7 +268,8 @@ class InstallmentController extends Controller
         $capital,
         $interest
       );
-      $entry_id =  $this->saveEntryInstallment($credit, $amount, $capital + $interest + $late_interest, $no_installment, $balance, $user_id, $subject);
+      $totalPaid =  $capital + $interest + $late_interest + $additional_interest;
+      $entry_id =  $this->saveEntryInstallment($credit, $amount, $totalPaid, $no_installment, $balance, $user_id, $subject);
     }
 
     return [
@@ -268,6 +285,8 @@ class InstallmentController extends Controller
       'helpPendingLateIint' => $helpPendingLateIint ?? null,
       'helpPendingInterest' => $helpPendingInterest ?? null,
       'helpPendingCapital' => $helpPendingCapital ?? null,
+      'helpPendingInterestAditional' => $helpPendingInterestAditional ?? null,
+      'helpPendingTotalInterest' => $helpPendingTotalInterest ?? null,
       'paidInterest' => $paidInterest ??  null,
       'no_installment' => $no_installment,
       'entry_id' => $entry_id ?? 'undefined'
@@ -510,7 +529,7 @@ class InstallmentController extends Controller
     $credit_paid = new CreditController;
     $credit_paid->updateValuesCredit($request, $credit->id, $paid_balance * -1,  $paid_capital * -1, $interest * -1, true);
 
-      //Restar valores en caja
+    //Restar valores en caja
     $box = Box::where('headquarter_id', $headquarter_id)->firstOrFail();
     $request->merge(['add_amount' => $paid_balance]);
     $sub_amount_box = new BoxController();

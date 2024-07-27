@@ -222,6 +222,7 @@ class CreditController extends Controller
 				$installment->payment_date = $new_installment['payment_date'];
 				$installment->interest_value = $new_installment['pagoInteres'];
 				$installment->capital_value = $new_installment['pagoCapital'];
+				$installment->additional_interest_value = $new_installment['pagoInteresAdicional'];
 				$installment->capital_balance = $new_installment['saldo_capital'];
 				if (!$installment->save()) {
 					Credit::findOrFail($credit->id)->delete();
@@ -474,8 +475,6 @@ class CreditController extends Controller
 						$installment->step = 3;
 					} else if ($paidInterest > $installment->interest_value) {
 						// Se calcula prioritariamente el interés mensual Pagado.
-						// $installment->late_interests_value_pending =  $late_interest_value;
-						// $installment->interest_value_pending = round($installment->interest_value - $paidInterest, 2);
 						$installment->interest_value_pending = 0;
 						$installment->additional_interest_value_pending =   round($installment->additional_interest_value - ($paidInterest - $installment->interest_value), 5);
 						$installment->late_interests_value_pending =  $late_interest_value;
@@ -489,8 +488,7 @@ class CreditController extends Controller
 				$installment->value_pending = round($installment->interest_value_pending + $installment->capital_value_pending + $installment->late_interests_value_pending + $installment->additional_interest_value_pending, 5);
 			} else {
 				$installment->capital_value_pending = $installment->capital_value - $installment->paid_capital < 0 ? 0 : $installment->capital_value - $installment->paid_capital;
-				$installment->additional_interest_value_pending = $installment->additional_interest_value;
-
+				$installment->additional_interest_value_pending = $installment->additional_interest_value - $installment->additional_interest_paid;
 				$installment->interest_value_pending = ((int)$installment->paid_balance - (int)$installment->paid_capital) >   $installment->interest_value ? 0 : round($installment->interest_value - ((int)$installment->paid_balance - (int)$installment->paid_capital), 5);
 				$installment->value_pending = round($installment->interest_value_pending + $installment->capital_value_pending + $installment->late_interests_value_pending + $installment->additional_interest_value_pending, 5);
 				$installment->paid_capital = $installment->paid_capital + $installment->credit_deposit;
@@ -521,6 +519,7 @@ class CreditController extends Controller
 		$credit->paid_value +=  $total_amount;
 		$credit->capital_value += $capital;
 		$credit->interest_value +=  $interest;
+		$credit->additional_interest_paid +=  $request->additional_interest;
 		if ($credit->capital_value >= $credit->credit_value) {
 			$checkLastInstallment = $credit->installments()->where('status', 0)->get();
 			if (isEmpty($checkLastInstallment)) {
