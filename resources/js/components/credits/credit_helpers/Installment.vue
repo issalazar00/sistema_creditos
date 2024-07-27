@@ -8,6 +8,7 @@
           <th>Valor</th>
           <th>Valor Capital</th>
           <th>Valor Interés</th>
+          <th>Interés Cobro & Admin</th>
           <th>Saldo capital</th>
           <template v-if="allow_payment">
             <th>Mora</th>
@@ -36,15 +37,15 @@
           </td>
           <th class="text-right font-weight-bold">
             <span class="text-danger">{{
-              quote.value_pending | currency
-            }}</span>
+            quote.value_pending | currency
+          }}</span>
             <br />
             <span class="text-dark small">{{ quote.value | currency }}</span>
           </th>
           <td class="text-right">
             <span class="text-danger">{{
-              quote.capital_value_pending | currency
-            }}</span>
+            quote.capital_value_pending | currency
+          }}</span>
             <br />
             <span class="text-dark small">{{
               quote.capital_value | currency
@@ -60,14 +61,23 @@
             }}</span>
           </td>
           <td class="text-right">
+            <span class="text-danger">{{
+              quote.additional_interest_value_pending | currency
+            }}</span>
+            <br />
+            <span class="text-dark small">{{
+              quote.additional_interest_value | currency
+            }}</span>
+          </td>
+          <td class="text-right">
             {{ quote.capital_balance | currency }}
           </td>
           <template v-if="allow_payment">
             <td class="text-right">
               <span class="text-danger">{{ quote.late_interests_value_pending | currency }}<br /></span>
               <span class="text-dark small" v-if="quote.days_past_due">{{
-                quote.late_interests_value | currency
-              }}</span>
+            quote.late_interests_value | currency
+          }}</span>
             </td>
             <td class="text-danger">
               {{ quote.days_past_due }}
@@ -98,7 +108,7 @@
                   class="form-control form-control-sm" placeholder="Valor" aria-label="Valor"
                   aria-describedby="pay-button" />
                 <div class="input-group-append">
-                  <button  class="btn btn-outline-success btn-sm" @click="payInstallment(quote, quote.add_payment)"
+                  <button class="btn btn-outline-success btn-sm" @click="payInstallment(quote, quote.add_payment)"
                     type="button" id="pay-button">
                     Abonar
                   </button>
@@ -116,16 +126,19 @@
             <td>
               <template>
                 <div>
-                  <textarea class="form-control mb-1" v-model="quote.payment_commitment" placeholder="Anotaciones de promesa de pago"></textarea> <br>
-                  <button type="button" v-if="quote.payment_commitment" class="btn btn-success" @click="sendPaymentCommitment(quote)">Enviar</button>
+                  <textarea class="form-control mb-1" v-model="quote.payment_commitment"
+                    placeholder="Anotaciones de promesa de pago"></textarea> <br>
+                  <button type="button" v-if="quote.payment_commitment" class="btn btn-success"
+                    @click="sendPaymentCommitment(quote)">Enviar</button>
                 </div>
               </template>
             </td>
             <td>
-              <button v-if="quote.value_pending <= 0 && !quote.status" class="btn btn-success" @click="updateStatus(quote)">
+              <button v-if="quote.value_pending <= 0 && !quote.status" class="btn btn-success"
+                @click="updateStatus(quote)">
                 <i class="bi bi-check2-square"></i>
               </button>
-              <button v-else class="btn btn-disabled btn-secondary"  disabled>
+              <button v-else class="btn btn-disabled btn-secondary" disabled>
                 <i class="bi bi-check2-square"></i>
               </button>
             </td>
@@ -301,7 +314,7 @@ export default {
         })
         .finally(this.listCreditInstallments(this.id_credit, 1));
     },
-    
+
     updateStatus(quote) {
       axios
         .post(
@@ -333,7 +346,7 @@ export default {
     sendPaymentCommitment(quote) {
       console.log(quote)
       let data = {
-        'payment_commitment' : quote.payment_commitment
+        'payment_commitment': quote.payment_commitment
       }
       axios
         .post(

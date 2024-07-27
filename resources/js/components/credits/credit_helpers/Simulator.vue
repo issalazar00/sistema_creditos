@@ -20,7 +20,8 @@
 									<th>Fecha</th>
 									<th>Cuota</th>
 									<th>Capital</th>
-									<th>Interés</th>
+									<th>Interés </th>
+									<th>Cobro y administración</th>
 									<th>Saldo Capital</th>
 								</tr>
 							</thead>
@@ -41,6 +42,9 @@
 										{{ installment.pagoInteres | currency }}
 									</td>
 									<td class="text-right">
+										{{ installment.pagoInteresAdicional | currency }}
+									</td>
+									<td class="text-right">
 										{{ installment.saldo_capital | currency }}
 									</td>
 								</tr>
@@ -55,7 +59,7 @@
 
 <script>
 export default {
-	props: ["number_installments", "interest", "capital", "start_date"],
+	props: ["number_installments", "interest", "additional_interest", "capital", "start_date"],
 	// capital value total del prestamo
 	//tasa de interest que se compraria
 	// plazos numero de pagos
@@ -118,7 +122,7 @@ export default {
 			let me = this;
 			axios
 				.get(
-					`api/installments/calculate-installments?credit_value=${this.capital}&interest=${this.interest}&number_installments=${this.number_installments}&start_date=${this.start_date}`
+					`api/installments/calculate-installments?credit_value=${this.capital}&interest=${this.interest}&additional_interest=${this.additional_interest}&number_installments=${this.number_installments}&start_date=${this.start_date}`
 				)
 				.then(
 					(response) => (

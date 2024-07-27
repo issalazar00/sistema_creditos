@@ -43,12 +43,25 @@
             placeholder="Ingresar tasa de interés mensual"
           />
         </div>
+        <div class="form-group col-md-4">
+          <label for="additional_interest">Interés cobro y administración</label>
+          <input
+            required
+            type="number"
+            class="form-control"
+            id="additional_interest"
+            v-model="additional_interest"
+            step="any"
+            placeholder="Ingresar tasa de interés cobro y administración"
+          />
+        </div>
       </div>
 
       <simulator
         :capital="capital"
         :interest="interest"
         :number_installments="number_installments"
+        :additional_interest="additional_interest"
         ref="Simulator"
       ></simulator>
     </div>
@@ -67,6 +80,7 @@ export default {
       interest: 3,
       capital: 500000,
       number_installments: 12,
+      additional_interest:0
     };
   },
   methods: {

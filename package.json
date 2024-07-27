@@ -17,7 +17,7 @@
         "lodash": "^4.17.19",
         "popper.js": "^1.16.1",
         "postcss": "^8.3.11",
-        "resolve-url-loader": "^3.1.2",
+        "resolve-url-loader": "^5.0.0",
         "sass": "^1.43.4",
         "sass-loader": "^11.0.1",
         "vue": "^2.6.12",
@@ -31,7 +31,7 @@
         "laravel-vue-pagination": "^2.3.1",
         "moment": "^2.29.1",
         "numeral": "^2.0.6",
-        "sweetalert2": "^11.10.7",
+        "sweetalert2": "^11.6.13",
         "vue-json-excel": "^0.3.0",
         "vue-router": "^3.5.3",
         "vue-select": "^3.16.0"

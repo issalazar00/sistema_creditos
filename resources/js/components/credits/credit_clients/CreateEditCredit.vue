@@ -233,6 +233,15 @@
                       formErrors.interest
                     }}</small>
                   </div>
+                  <div class="form-group col-12  col-lg-4">
+                    <label for="additional_interest">Cobro y administración  (%)</label>
+                    <input type="number" class="form-control" id="additional_interest" v-model="formCredit.additional_interest" step="any"
+                      :disabled="edit" :class="[formErrors.additional_interest ? 'is-invalid' : '']" placeholder="Ingresar interés"
+                      value="3" />
+                    <small id="interest_help" class="form-text text-danger">{{
+                      formErrors.additional_interest
+                    }}</small>
+                  </div>
 
                   <div class="form-group col-12  col-lg-4">
                     <label for="number_installments">Cantidad Cuotas</label>
@@ -254,7 +263,7 @@
                   </div>
                 </template>
               </div>
-              <simulator :capital="formCredit.credit_value" :interest="formCredit.interest"
+              <simulator :capital="formCredit.credit_value" :interest="formCredit.interest" :additional_interest="formCredit.additional_interest"
                 :number_installments="formCredit.number_installments" :start_date="formCredit.start_date" ref="Simulator"
                 v-if="!edit"></simulator>
               <div class="modal-footer">
@@ -320,7 +329,8 @@ export default {
         provider: 0,
         status: "1",
         start_date: "",
-        interest: "",
+        interest: 0,
+        additional_interest:0,
         annual_interest_percentage: 0,
         installment_value: "",
         credit_value: "",
@@ -356,6 +366,7 @@ export default {
         status: "",
         start_date: "",
         interest: "",
+        additional_interest:"",
         annual_interest_percentage: "",
         installment_value: "",
         credit_value: "",

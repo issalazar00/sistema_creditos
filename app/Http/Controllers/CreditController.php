@@ -448,6 +448,7 @@ class CreditController extends Controller
 			if (($payment_date < $now) &&  $installment->status != '1') {
 				$installment->capital_value_pending = $installment->capital_value - $installment->paid_capital < 0 ? 0 : $installment->capital_value - $installment->paid_capital;
 				$installment->interest_value_pending = $installment->interest_value;
+				$installment->additional_interest_value_pending = $installment->additional_interest_value;
 
 				$days_past_due = $installment->days_past_due ? $installment->days_past_due :  $now->diffInDays($payment_date);
 				$day_value_default = ($installment->interest_value * $configuration->late_interest_day);
@@ -456,27 +457,42 @@ class CreditController extends Controller
 				$installment->days_past_due  = $days_past_due;
 				$installment->late_interests_value  = round($late_interest_value, 5);
 				$installment->late_interests_value_pending = $installment->late_interests_value;
-				$installment->step = 5;
+				$installment->step = 6;
 
+				$totalInterests = $installment->interest_value + $installment->additional_interest_value;
 				if (($installment->paid_balance)) {
 					$installment->step = 4;
 
+					// Sobrante para pago a intereses después de pago a capital
 					$paidInterest = $installment->paid_balance - $installment->paid_capital;
-					if ($paidInterest > ($installment->interest_value)) {
-						$installment->late_interests_value_pending =  round($late_interest_value - ($paidInterest - $installment->interest_value), 5);
+
+					if ($paidInterest > ($totalInterests)) {
+						//Intereses de mora pendientes =  Total de interes de mora - total de intereses comunes pagados.
+						$installment->late_interests_value_pending =  round($late_interest_value - ($paidInterest - $totalInterests), 5);
 						$installment->interest_value_pending = 0;
+						$installment->additional_interest_value_pending = 0;
 						$installment->step = 3;
+					} else if ($paidInterest > $installment->interest_value) {
+						// Se calcula prioritariamente el interés mensual Pagado.
+						// $installment->late_interests_value_pending =  $late_interest_value;
+						// $installment->interest_value_pending = round($installment->interest_value - $paidInterest, 2);
+						$installment->interest_value_pending = 0;
+						$installment->additional_interest_value_pending =   round($installment->additional_interest_value - ($paidInterest - $installment->interest_value), 5);
+						$installment->late_interests_value_pending =  $late_interest_value;
+						$installment->step = 5;
 					} else {
 						$installment->late_interests_value_pending =  $late_interest_value;
 						$installment->interest_value_pending = round($installment->interest_value - $paidInterest, 2);
-						$installment->step = 2;
+						$installment->step = 6;
 					}
 				}
-				$installment->value_pending = round($installment->interest_value_pending + $installment->capital_value_pending + $installment->late_interests_value_pending, 5);
+				$installment->value_pending = round($installment->interest_value_pending + $installment->capital_value_pending + $installment->late_interests_value_pending + $installment->additional_interest_value_pending, 5);
 			} else {
 				$installment->capital_value_pending = $installment->capital_value - $installment->paid_capital < 0 ? 0 : $installment->capital_value - $installment->paid_capital;
+				$installment->additional_interest_value_pending = $installment->additional_interest_value;
+
 				$installment->interest_value_pending = ((int)$installment->paid_balance - (int)$installment->paid_capital) >   $installment->interest_value ? 0 : round($installment->interest_value - ((int)$installment->paid_balance - (int)$installment->paid_capital), 5);
-				$installment->value_pending = round($installment->interest_value_pending + $installment->capital_value_pending + $installment->late_interests_value_pending, 5);
+				$installment->value_pending = round($installment->interest_value_pending + $installment->capital_value_pending + $installment->late_interests_value_pending + $installment->additional_interest_value_pending, 5);
 				$installment->paid_capital = $installment->paid_capital + $installment->credit_deposit;
 				$installment->paid_balance = $installment->paid_balance + $installment->credit_deposit;
 				$installment->step = 1;

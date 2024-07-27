@@ -10,11 +10,12 @@ use Illuminate\Http\Request;
 class FranchiseMethodController extends InstallmentController
 {
 
-  // Calculo de cuotas de sistema general
+  // Calculo de cuotas de sistema francés
   public function calculateInstallments(Request $request)
   {
     $capital = $request->credit_value;
     $interest = $request->interest;
+    $additional_interest = floatval($request->additional_interest) ?: 0;
     $number_installments = $request->number_installments;
     $start_date = date('Y-m-d');
 
@@ -24,6 +25,7 @@ class FranchiseMethodController extends InstallmentController
 
     $value = $capital;
     $valor_pago_interes = $interest;
+    $valor_pago_additional_interest = $additional_interest;
     $installment_number = $number_installments;
 
     $payment_date = [];
@@ -32,35 +34,31 @@ class FranchiseMethodController extends InstallmentController
 
     $listInstallments = [];
     $pagoInteres = [];
+    $pagoInteresAdicional = [];
     $pagoCapital = [];
+    $totalInterest = $valor_pago_interes + $valor_pago_additional_interest;
+    $int = pow(1 + ($totalInterest) / 100, $installment_number);
 
-    $installment =
-      ($value *
-        ((pow(1 + $valor_pago_interes / 100, $installment_number) *
-          $valor_pago_interes) /
-          100)) /
-      (pow(1 + $valor_pago_interes / 100, $installment_number) - 1);
+    $installment = ($value * (($int * ($totalInterest)) / 100)) / ($int - 1);
 
     for ($i = 0; $i < $number_installments; $i++) {
 
       $payment_date[$i] = (date("Y-m-d", strtotime($mes_actual . "+ $i months")));
 
       $pagoInteres[$i] = ($value * ($valor_pago_interes / 100));
-      $pagoCapital[$i] = $installment - $pagoInteres[$i];
+      $pagoInteresAdicional[$i] = ($value * ($valor_pago_additional_interest / 100));
+      $pagoCapital[$i] = $installment - $pagoInteres[$i] - $pagoInteresAdicional[$i];
       $value = ($value - $pagoCapital[$i]);
 
-      foreach ($pagoCapital as $pc) {
-        $listInstallments[$i]['pagoCapital'] = (float) number_format($pc, 2, '.', '');
-      }
-      foreach ($pagoInteres as $key => $pi) {
-        $listInstallments[$i]['pagoInteres'] = (float) number_format($pi, 2, '.', '');
-      }
-      foreach ($payment_date as $fp) {
-        $listInstallments[$i]['payment_date'] = (date($fp));
-        $listInstallments[$i]['saldo_capital'] = (float) number_format($value, 2, '.', '');
-        $listInstallments[$i]['installment_value'] = (float) number_format($installment, 2, '.', '');
-      }
-      $listInstallments[$i]['installment_number'] = $i + 1;
+      $listInstallments[$i] = [
+        'installment_number' => $i + 1,
+        'pagoCapital' => (float) number_format($pagoCapital[$i], 2, '.', ''),
+        'pagoInteres' => (float) number_format($pagoInteres[$i], 2, '.', ''),
+        'pagoInteresAdicional' => (float) number_format($pagoInteresAdicional[$i], 2, '.', ''),
+        'payment_date' => $payment_date[$i],
+        'saldo_capital' => (float) number_format($value, 2, '.', ''),
+        'installment_value' => (float) number_format($installment, 2, '.', '')
+      ];
     }
 
     return ['listInstallments' => $listInstallments, 'installment' => (float) number_format($installment, 2, '.', '')];
@@ -83,6 +81,7 @@ class FranchiseMethodController extends InstallmentController
       ->get();
 
     $interest = $credit->interest;
+    $additional_interest = $credit->additional_interest;
     $number_installments = count($installments);
     $start_date = date('Y-m-d');
 
@@ -92,6 +91,7 @@ class FranchiseMethodController extends InstallmentController
 
     $value = $capital;
     $valor_pago_interes = $interest;
+    $valor_pago_additional_interest = $additional_interest;
     $installment_number = $number_installments;
 
     $payment_date = [];
@@ -100,44 +100,44 @@ class FranchiseMethodController extends InstallmentController
 
     $listInstallments = [];
     $pagoInteres = [];
+    $pagoInteresAdicional = [];
     $pagoCapital = [];
 
+    $totalInterest = $valor_pago_interes + $valor_pago_additional_interest;
+    $int = pow(1 + ($totalInterest) / 100, $installment_number);
+
     if ($number_installments) {
-      $installment =
-        ($value *
-          ((pow(1 + $valor_pago_interes / 100, $installment_number) *
-            $valor_pago_interes) /
-            100)) /
-        (pow(1 + $valor_pago_interes / 100, $installment_number) - 1);
+      $installment = ($value * (($int * ($totalInterest)) / 100)) / ($int - 1);
 
       for ($i = 0; $i < $number_installments; $i++) {
         $id_installment = $installments[$i]->id;
         $payment_date[$i] = (date("Y-m-d", strtotime($mes_actual . "+ $i months")));
 
         $pagoInteres[$i] = ($value * ($valor_pago_interes / 100));
-        $pagoCapital[$i] = $installment - $pagoInteres[$i];
+        $pagoInteresAdicional[$i] = ($value * ($valor_pago_additional_interest / 100));
+        $pagoCapital[$i] = $installment - $pagoInteres[$i] - $pagoInteresAdicional[$i];
+
         $value = ($value - $pagoCapital[$i]);
 
-        foreach ($pagoCapital as $pc) {
-          $listInstallments[$i]['pagoCapital'] = (float) number_format($pc, 2, '.', '');
-        }
-        foreach ($pagoInteres as $key => $pi) {
-          $listInstallments[$i]['pagoInteres'] = (float) number_format($pi, 2, '.', '');
-        }
-        foreach ($payment_date as $fp) {
-          $listInstallments[$i]['payment_date'] = (date($fp));
-          $listInstallments[$i]['saldo_capital'] = (float) number_format($value, 2, '.', '');
-          $listInstallments[$i]['installment_value'] = (float) number_format($installment, 2, '.', '');
-        }
+        $listInstallments[$i] = [
+          'installment_number' => $i + 1,
+          'pagoCapital' => (float) number_format($pagoCapital[$i], 2, '.', ''),
+          'pagoInteres' => (float) number_format($pagoInteres[$i], 2, '.', ''),
+          'pagoInteresAdicional' => (float) number_format($pagoInteresAdicional[$i], 2, '.', ''),
+          'payment_date' => $payment_date[$i],
+          'saldo_capital' => (float) number_format($value, 2, '.', ''),
+          'installment_value' => (float) number_format($installment, 2, '.', '')
+        ];
+
         Installment::findOrFail($id_installment)->update(
           [
             'value' =>  $listInstallments[$i]['installment_value'],
             'interest_value' =>  $listInstallments[$i]['pagoInteres'],
             'capital_value' =>  $listInstallments[$i]['pagoCapital'],
+            'additional_interest_value' =>  $listInstallments[$i]['pagoInteresAdicional'],
             'capital_balance' => $listInstallments[$i]['saldo_capital']
           ]
         );
-        $listInstallments[$i]['installment_number'] = $i + 1;
       }
       $credit->update(
         ['installment_value' =>  $listInstallments[0]['installment_value']]
@@ -163,6 +163,7 @@ class FranchiseMethodController extends InstallmentController
       ->get();
 
     $interest = $new_interest ? $new_interest : $credit->interest;
+    $additional_interest = $credit->additional_interest;
     $number_installments = count($installments);
     $start_date = date('Y-m-d');
 
@@ -172,6 +173,7 @@ class FranchiseMethodController extends InstallmentController
 
     $value = $capital;
     $valor_pago_interes = $interest;
+    $valor_pago_additional_interest = $additional_interest;
     $installment_number = $number_installments;
 
     $payment_date = [];
@@ -180,44 +182,46 @@ class FranchiseMethodController extends InstallmentController
 
     $listInstallments = [];
     $pagoInteres = [];
+    $pagoInteresAdicional = [];
     $pagoCapital = [];
 
+
+    $totalInterest = $valor_pago_interes + $valor_pago_additional_interest;
+    $int = pow(1 + ($totalInterest) / 100, $installment_number);
+
+
     if ($number_installments) {
-      $installment =
-        ($value *
-          ((pow(1 + $valor_pago_interes / 100, $installment_number) *
-            $valor_pago_interes) /
-            100)) /
-        (pow(1 + $valor_pago_interes / 100, $installment_number) - 1);
+      $installment = ($value * (($int * ($totalInterest)) / 100)) / ($int - 1);
+
 
       for ($i = 0; $i < $number_installments; $i++) {
         $id_installment = $installments[$i]->id;
         $payment_date[$i] = (date("Y-m-d", strtotime($mes_actual . "+ $i months")));
 
         $pagoInteres[$i] = ($value * ($valor_pago_interes / 100));
+        $pagoInteresAdicional[$i] = ($value * ($valor_pago_additional_interest / 100));
+
         $pagoCapital[$i] = $installment - $pagoInteres[$i];
         $value = ($value - $pagoCapital[$i]);
 
-        foreach ($pagoCapital as $pc) {
-          $listInstallments[$i]['pagoCapital'] = (float) number_format($pc, 2, '.', '');
-        }
-        foreach ($pagoInteres as $key => $pi) {
-          $listInstallments[$i]['pagoInteres'] = (float) number_format($pi, 2, '.', '');
-        }
-        foreach ($payment_date as $fp) {
-          $listInstallments[$i]['payment_date'] = (date($fp));
-          $listInstallments[$i]['saldo_capital'] = (float) number_format($value, 2, '.', '');
-          $listInstallments[$i]['installment_value'] = (float) number_format($installment, 2, '.', '');
-        }
+        $listInstallments[$i] = [
+          'installment_number' => $i + 1,
+          'pagoCapital' => (float) number_format($pagoCapital[$i], 2, '.', ''),
+          'pagoInteres' => (float) number_format($pagoInteres[$i], 2, '.', ''),
+          'pagoInteresAdicional' => (float) number_format($pagoInteresAdicional[$i], 2, '.', ''),
+          'payment_date' => $payment_date[$i],
+          'saldo_capital' => (float) number_format($value, 2, '.', ''),
+          'installment_value' => (float) number_format($installment, 2, '.', '')
+        ];
         Installment::findOrFail($id_installment)->update(
           [
             'value' =>  $listInstallments[$i]['installment_value'],
             'interest_value' =>  $listInstallments[$i]['pagoInteres'],
+            'additional_interest_value' =>  $listInstallments[$i]['pagoInteresAdicional'],
             'capital_value' =>  $listInstallments[$i]['pagoCapital'],
             'capital_balance' => $listInstallments[$i]['saldo_capital']
           ]
         );
-        $listInstallments[$i]['installment_number'] = $i + 1;
       }
       $credit->update(
         ['installment_value' =>  $listInstallments[0]['installment_value']]
