@@ -189,6 +189,7 @@ class CreditController extends Controller
 		$credit->paid_value = $request['paid_value'];
 		$credit->capital_value = $request['capital_value'];
 		$credit->interest_value = $request['interest_value'];
+		$credit->additional_interest = $request['additional_interest'];
 		$credit->description = $request['description'];
 		$credit->installment_value = $listInstallments['installment'];
 

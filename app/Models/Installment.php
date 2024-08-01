@@ -18,6 +18,7 @@ class Installment extends Model
     'days_past_due',
     'late_interests_value',
     'interest_value',
+    'additional_interest_value',
     'capital_value',
     'paid_balance',
     'paid_capital',

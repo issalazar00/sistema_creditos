@@ -324,6 +324,7 @@ class InstallmentController extends Controller
     $balance = (float) $request->amount;
     $capital = 0;
     $interest = 0;
+    $additional_interest = 0;
     $days_past_due = 0;
     $late_interest = 0;
     $late_interests_value = 0;
@@ -338,7 +339,7 @@ class InstallmentController extends Controller
       ->whereDate('payment_date', '<=', $now)
       ->where(function ($query) use ($late_interest_pending) {
         $query
-          ->whereRaw("((paid_balance - paid_capital)+0.1) < ((interest_value)+$late_interest_pending)")
+          ->whereRaw("((paid_balance - paid_capital)+0.1) < ((interest_value)+additional_interest_value+$late_interest_pending)")
           ->orWhereNull('paid_balance');
       })->first();
 
@@ -354,15 +355,19 @@ class InstallmentController extends Controller
 
     $paidTotalCredit =  $credit->installments()->selectRaw("
     SUM(interest_value) AS interest_value,
+    SUM(additional_interest_value) AS additional_interest_value,
       SUM(paid_capital) AS paid_capital,
       SUM(paid_balance) AS paid_balance
     ")->where('paid_balance', '>', 0)->first();
 
     $totalCredit =  $credit->installments()->selectRaw("
-      SUM(interest_value) AS interest_value
+      SUM(interest_value) AS interest_value,
+      SUM(additional_interest_value) AS additional_interest_value
+
     ")->first();
 
-    $balance_credit = (($credit->credit_value + $totalCredit->interest_value) - ($paidTotalCredit->paid_capital + $paidTotalCredit->interest_value));
+    // Valor de crédito incluyendo intereses - Valor pagado actualmente
+    $balance_credit = (($credit->credit_value + $totalCredit->interest_value + $totalCredit->additional_interest_value) - ($paidTotalCredit->paid_capital + $paidTotalCredit->interest_value + $paidTotalCredit->additional_interest_value));
 
     if ($balance_credit <= $amount) {
       $amount = $balance_credit;
@@ -381,6 +386,7 @@ class InstallmentController extends Controller
       }
       $credit_paid = new CreditController;
       $request->merge(['user_id' => $user_id]);
+      $request->merge(['additional_interest' => $additional_interest]);
       $credit_paid->updateValuesCredit($request, $credit->id, $amount, $balance, $interest);
       $entry_id =  $this->saveEntryInstallment($credit, $amount, $balance, $no_installment, $balance, $user_id, 'Abono a crédito');
     }
@@ -407,7 +413,7 @@ class InstallmentController extends Controller
       'interest' => $interest,
       'step' => $step,
       'status' => $status,
-      'entry_id' => $entry_id,
+      'entry_id' => $entry_id ?? 'undefined',
       'late_interest' => $late_interest ?? null,
       'late_interests_value' => $late_interests_value ?? null,
       'helpPendingLateIint' => $helpPendingLateIint ?? null,
