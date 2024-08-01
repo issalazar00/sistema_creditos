@@ -163,10 +163,10 @@ class InstallmentController extends Controller
             $capital = $helpPendingCapital;
             $balance = $balance - $capital;
             $paidInterest = $installment->paid_balance - $installment->paid_capital;
-            $helpPendingInterest = $installment->interest_value - ($paidInterest);
-            $helpPendingInterestAditional =   round($installment->additional_interest_value - ($paidInterest), 5);
-            $helpPendingTotalInterest = $helpPendingInterest + $helpPendingInterestAditional;
 
+            $helpPendingInterest = ($paidInterest) < $installment->interest_value   ?  $installment->interest_value - ($paidInterest) : 0;
+            $helpPendingInterestAditional =   round($installment->additional_interest_value - $installment->additional_interest_paid, 5);
+            $helpPendingTotalInterest = $helpPendingInterest + $helpPendingInterestAditional;
             if ((int) $balance >= (int)$helpPendingTotalInterest) {
               $interest =  $helpPendingInterest;
               $additional_interest =  $helpPendingInterestAditional;
@@ -175,15 +175,13 @@ class InstallmentController extends Controller
               $step = 3;
             } else {
               if ((int) $balance >= (int)  $helpPendingInterest) {
-                //15300, 8300, 7000
                 $interest =  $helpPendingInterest;
                 $additional_interest =  $balance - $interest;
                 $balance = $balance - ($interest + $additional_interest);
                 $step = 20;
               } else {
                 $interest = $balance;
-                $balance = $balance - $interest;
-                $additional_interest =  $helpPendingInterestAditional;
+                $balance =  $balance - $interest;
                 $step = 4;
               }
             }
@@ -209,13 +207,18 @@ class InstallmentController extends Controller
           $capital = $helpPendingCapital < 0 ? 0 : $helpPendingCapital;
           $balance = $balance - $capital;
           $paidInterest = $installment->paid_balance - $installment->paid_capital;
-          $helpPendingInterest = $paidInterest > $installment->interest_value ? 0 : $installment->interest_value - $paidInterest;
+          $helpPendingInterest = ($paidInterest) < $installment->interest_value   ?  $installment->interest_value - ($paidInterest) : 0;
+          $helpPendingInterestAditional =   round($installment->additional_interest_value - $installment->additional_interest_paid, 5);
+          $helpPendingTotalInterest = $helpPendingInterest + $helpPendingInterestAditional;
+          $helpPaidLateInt = $paidInterest > $helpPendingTotalInterest ? $paidInterest - $helpPendingTotalInterest : 0;
+          $helpPendingLateIint =  $late_interests_value - $helpPaidLateInt;
           //Hay intereses pendientes
-          if ((int)$balance >= (int)$helpPendingInterest) {
+
+          if ((int) $balance >= (int)$helpPendingTotalInterest) {
             $interest =  $helpPendingInterest;
-            $balance = $balance - $interest;
-            $helpPaidLateInt = $paidInterest > $installment->interest_value ? $paidInterest - $installment->interest_value : 0;
-            $helpPendingLateIint =  $late_interests_value - $helpPaidLateInt;
+            $additional_interest =  $helpPendingInterestAditional;
+            $balance = $balance - $helpPendingTotalInterest;
+            $step = 15;
 
             if ((int) $balance >= (int) $helpPendingLateIint) {
               if (!$helpPendingLateIint) {
@@ -224,16 +227,23 @@ class InstallmentController extends Controller
               $late_interest = $helpPendingLateIint;
               $balance = $balance - $late_interest;
               $status = 1;
-              $step = 1;
+              $step = 16;
             } else {
               $late_interest = $balance;
-              $step = 2;
+              $step = 17;
               $balance = $balance - $late_interest;
             }
+          }  else {
+            if ((int) $balance >= (int)  $helpPendingInterest) {
+              $interest =  $helpPendingInterest;
+              $additional_interest =  $balance - $interest;
+              $balance = $balance - ($interest + $additional_interest);
+              $step = 18;
           } else {
             $interest = $balance;
-            $balance = $balance - $interest;
-            $step = 6;
+              $balance =  $balance - $interest;
+              $step = 19;
+            }
           }
         } else {
           $capital = $balance;
@@ -289,7 +299,8 @@ class InstallmentController extends Controller
       'helpPendingTotalInterest' => $helpPendingTotalInterest ?? null,
       'paidInterest' => $paidInterest ??  null,
       'no_installment' => $no_installment,
-      'entry_id' => $entry_id ?? 'undefined'
+      'entry_id' => $entry_id ?? 'undefined',
+      'additional_interest'=>$additional_interest
     ];
     // return [
     //   'balance' => $balance,

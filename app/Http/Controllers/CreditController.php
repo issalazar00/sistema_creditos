@@ -458,7 +458,7 @@ class CreditController extends Controller
 				$installment->days_past_due  = $days_past_due;
 				$installment->late_interests_value  = round($late_interest_value, 5);
 				$installment->late_interests_value_pending = $installment->late_interests_value;
-				$installment->step = 6;
+				$installment->step = 7;
 
 				$totalInterests = $installment->interest_value + $installment->additional_interest_value;
 				if (($installment->paid_balance)) {
