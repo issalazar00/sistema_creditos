@@ -90,6 +90,7 @@
                     <th>Valor</th>
                     <th>Abono Capital</th>
                     <th>Abono Interés</th>
+                    <th>Abono a Interés Cobro & Admin</th>
                     <th>Saldo capital</th>
                 </tr>
             </thead>
@@ -101,6 +102,7 @@
                         <td>$ {{ number_format($f->value, 0, '', '.') }}</td>
                         <td> $ {{ number_format($f->capital_value, 0, '', '.') }}</td>
                         <td> $ {{ number_format($f->interest_value, 0, '', '.') }}</td>
+                        <td> $ {{ number_format($f->additional_interest_value, 0, '', '.') }}</td>
                         <td>$ {{ number_format($f->capital_balance, 0, '', '.') }}</td>
 
                     </tr>

@@ -18,7 +18,7 @@
         </li>
       </ul>
     </div>
-  
+
     <div class="page-search p-4 border my-2">
       <h6 class="text-primary text-uppercase">Filtrar:</h6>
       <form>
@@ -71,6 +71,7 @@
               <th>Afectación</th>
               <th>Capital</th>
               <th>Interés</th>
+              <th>Interés Cobro & Admin </th>
               <th>Valor</th>
             </tr>
           </thead>
@@ -87,14 +88,19 @@
               <td class="text-right">{{ report.paid_capital | currency }}</td>
 
               <td>
-                {{ (report.paid_balance - report.paid_capital) | currency }}
+                {{ (report.paid_balance - report.paid_capital - report.additional_interest_paid) | currency }}
+              </td>
+              <td>
+                {{ (report.additional_interest_paid) | currency }}
               </td>
               <td class="text-right">{{ report.paid_balance | currency }}</td>
             </tr>
             <tr>
               <th colspan="5"></th>
               <th> {{ ReportPortfolioTotal.paid_capital | currency }}</th>
-              <th> {{ (ReportPortfolioTotal.paid_balance - ReportPortfolioTotal.paid_capital) | currency }}</th>
+              <th> {{ (ReportPortfolioTotal.paid_balance -
+                ReportPortfolioTotal.paid_capital - ReportPortfolioTotal.additional_interest_paid) | currency }}</th>
+              <th> {{ ReportPortfolioTotal.additional_interest_paid | currency }}</th>
               <th> {{ ReportPortfolioTotal.paid_balance | currency }}</th>
             </tr>
           </tbody>
@@ -167,8 +173,14 @@ export default {
           callback: (value) => {
             let c = value.paid_capital;
             let b = value.paid_balance;
-            let i = b-c;
+            let d = value.additional_interest_paid;
+            let i = b - c - d;
             return Number(i).toFixed(2);
+          }
+        },
+        'Interés Cobro & Admin ': {
+          callback: (value) => {
+            return Number(value.additional_interest_paid).toFixed(2);
           }
         },
         'Valor': {
@@ -183,7 +195,7 @@ export default {
   },
   methods: {
     listReportInstallments(page = 1) {
-      this.loading=true;
+      this.loading = true;
       let data = {
         page: page,
         from: this.search_from,
@@ -199,9 +211,9 @@ export default {
         .then((response) => {
           this.ReportInstallmentList = response.data.installments;
           this.ReportPortfolioTotal = response.data.totals;
-          this.loading=false;
-        }).catch(()=>{
-          this.loading=false;
+          this.loading = false;
+        }).catch(() => {
+          this.loading = false;
         });
     },
 

@@ -25,7 +25,9 @@ class GetTotalReportsController extends Controller
     {
         $data = [
             'paid_capital' => $results->sum('paid_capital'),
-            'paid_balance' => $results->sum('paid_balance')
+            'paid_balance' => $results->sum('paid_balance'),
+            'additional_interest_paid' => $results->sum('additional_interest_paid')
+
         ];
 
         return $data;

@@ -540,6 +540,7 @@ class CreditController extends Controller
 					'payment_register' => date('Y-m-d'),
 					'paid_balance' => 0,
 					'paid_capital' => 0,
+					'additional_interest_paid' => 0,
 					'collected_by' => $request->user()->id
 				]
 			);
@@ -634,6 +635,7 @@ class CreditController extends Controller
 			DB::raw('SUM(credit_value) as credit_value '),
 			DB::raw('SUM(paid_value) as paid_value'),
 			DB::raw('SUM(interest_value) as interest_value'),
+			DB::raw('SUM(additional_interest_paid) as additional_interest_paid'),
 			DB::raw('SUM(capital_value) as capital_value')
 		);
 		if ($status == null) {

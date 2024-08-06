@@ -300,7 +300,7 @@ class InstallmentController extends Controller
       'paidInterest' => $paidInterest ??  null,
       'no_installment' => $no_installment,
       'entry_id' => $entry_id ?? 'undefined',
-      'additional_interest'=>$additional_interest
+      'additional_interest' => $additional_interest
     ];
     // return [
     //   'balance' => $balance,
@@ -543,6 +543,7 @@ class InstallmentController extends Controller
 
     //Restar valores en el crédito
     $request->merge(['user_id' => $user_id]);
+    $request->merge(['additional_interest' => - $installment->additional_interest_paid]);
     $credit_paid = new CreditController;
     $credit_paid->updateValuesCredit($request, $credit->id, $paid_balance * -1,  $paid_capital * -1, $interest * -1, true);
 

@@ -20,9 +20,8 @@
           <div class="form-group col-md-4">
             <label for="search_headquarter_id" class=" w-100 form-label">Sede
             </label>
-            <v-select label="headquarter" class="w-100" v-model="search_headquarter_id"
-              :reduce="(option) => option.id" :filterable="false" :options="listHeadquarters"
-              @search="onSearchHeadquarter">
+            <v-select label="headquarter" class="w-100" v-model="search_headquarter_id" :reduce="(option) => option.id"
+              :filterable="false" :options="listHeadquarters" @search="onSearchHeadquarter">
               <template slot="no-options">
                 Escribe para iniciar la búsqueda
               </template>
@@ -82,8 +81,8 @@
             </button>
           </div>
           <div class="form-group col-md-4 col-sm-6 col-xs-6">
-            <download-excel class="btn btn-primary w-100 mt-5" :fields="json_fields" :data="ReportGeneralCreditsList.data"
-              name="report-general-credits.xls" type="xls">
+            <download-excel class="btn btn-primary w-100 mt-5" :fields="json_fields"
+              :data="ReportGeneralCreditsList.data" name="report-general-credits.xls" type="xls">
               <i class="bi bi-file-earmark-arrow-down-fill"></i> Descargar .xls
             </download-excel>
           </div>
@@ -108,6 +107,7 @@
               <th>Total abonado</th>
               <th>Abono a capital</th>
               <th>Abono a intereses</th>
+              <th>Abono a Interés Cobro & Admin</th>
               <th>Saldo capital</th>
               <th>Saldo pendiente</th>
             </tr>
@@ -137,6 +137,7 @@
               <td class="text-right">{{ report.paid_value | currency }}</td>
               <td class="text-right">{{ report.capital_value | currency }}</td>
               <td class="text-right">{{ report.interest_value | currency }}</td>
+              <td class="text-right">{{ report.additional_interest_paid | currency }}</td>
               <td class="text-right">{{ calculateBalanceInstallment(report) | currency }}</td>
               <td class="text-right">{{ report.credit_to_pay | currency }}</td>
             </tr>
@@ -168,6 +169,10 @@
             <td>{{ ReportTotalValues.interest_value | currency }}</td>
           </tr>
           <tr class="text-right">
+            <th>Total abonado a intereses Cobro & Admin</th>
+            <td>{{ ReportTotalValues.additional_interest_paid | currency }}</td>
+          </tr>
+          <tr class="text-right">
             <th class="font-weight-bold">Total saldo capital</th>
             <td>{{ calculateBalanceInstallment(ReportTotalValues) | currency }}</td>
           </tr>
@@ -177,7 +182,8 @@
           </tr>
           <tr class="text-right">
             <th class="font-weight-bold">Total interés a recaudar</th>
-            <td>{{ (ReportTotalValues.total_credit_to_pay - calculateBalanceInstallment(ReportTotalValues)) | currency }}
+            <td>{{ (ReportTotalValues.total_credit_to_pay - calculateBalanceInstallment(ReportTotalValues)) | currency
+              }}
             </td>
           </tr>
           <!-- <tr class="text-right">
@@ -317,6 +323,12 @@ export default {
             return this.$options.filters.currency(value, 'export');
           }
         },
+        'Abono a Interés Cobro & Admin': {
+          field: 'additional_interest_paid',
+          callback: (value) => {
+            return this.$options.filters.currency(value, 'export');
+          }
+        },
         'Saldo capital': {
           callback: (value) => {
             return this.$options.filters.currency(this.calculateBalanceInstallment(value), 'export');
@@ -367,7 +379,7 @@ export default {
     },
     calculateBalanceInstallment(data) {
       // console.log("Value saldo: ", (data.credit_value + data.interest_value) - data.paid_value);
-      return (data.credit_value + data.interest_value) - data.paid_value;
+      return (data.credit_value + data.interest_value + data.additional_interest_paid) - data.paid_value;
     },
     onSearchHeadquarter(search, loading) {
       if (search.length) {

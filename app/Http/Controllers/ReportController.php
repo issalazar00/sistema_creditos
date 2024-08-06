@@ -200,6 +200,7 @@ class ReportController extends Controller
 			DB::raw('SUM(paid_value) as paid_value'),
 			DB::raw('SUM(interest_value) as interest_value'),
 			DB::raw('SUM(capital_value) as capital_value'),
+			DB::raw('SUM(additional_interest_paid) as additional_interest_paid'),
 			'headquarter_id',
 			'headquarters.headquarter as headquarter'
 		)

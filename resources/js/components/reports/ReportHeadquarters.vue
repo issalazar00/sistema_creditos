@@ -40,6 +40,7 @@
 							<th>Monto Crédito</th>
 							<th>Capital Abonado</th>
 							<th>Interés abonado</th>
+							<th>Interés Cobro & Admin abonado</th>
 						</tr>
 					</thead>
 					<tbody v-if="ReportHeaquartersList.data">
@@ -56,6 +57,8 @@
 							<td class="text-right">{{ report.credit_value | currency }}</td>
 							<td class="text-right">{{ report.capital_value | currency }}</td>
 							<td class="text-right">{{ report.interest_value | currency }}</td>
+							<td class="text-right">{{ report.additional_interest_paid | currency }}</td>
+							
 						</tr>
 					</tbody>
 				</table>
@@ -132,6 +135,12 @@ export default {
 				},
 				'Interés abonado': {
 					field: 'interest_value',
+					callback: (value) => {
+						return this.$options.filters.currency(value, 'export');
+					}
+				},
+				'Interés Cobro & Admin abonado': {
+					field: 'additional_interest_paid',
 					callback: (value) => {
 						return this.$options.filters.currency(value, 'export');
 					}
