@@ -28,6 +28,11 @@
             </v-select>
           </div>
           <div class="form-group col-md-4 ml-md-auto">
+            <label for="search_type_movement">Tipo de salida:</label>
+            <input type="text" id="search_type_movement" name="search_type_movement" class="form-control"
+              placeholder="Escribir el tipo de movmiento" v-model="search_type_movement" />
+          </div>
+          <div class="form-group col-md-4 ml-md-auto">
             <label for="search_type_output">Tipo de salida:</label>
             <input type="text" id="search_type_output" name="search_type_output" class="form-control"
               placeholder="Escribir el tipo de salida" v-model="search_type_output" />
@@ -72,6 +77,7 @@
               <th>Sede</th>
               <th>Responsable</th>
               <th>Fecha</th>
+              <th>Tipo de movimiento</th>
               <th>Tipo de Salida</th>
               <th>Descripción</th>
               <th>Valor</th>
@@ -87,9 +93,11 @@
               <td>{{ e.headquarter.headquarter }}</td>
               <td>{{ e.user.name }} {{ e.user.last_name }}</td>
               <td>{{ e.date }}</td>
+              <td>{{ e.type_movement }}</td>
               <td>{{ e.type_output }}</td>
               <td class="wrap">
-                <textarea name="" class="form-control-plaintext" readonly id="" cols="7" rows="4" v-model="e.description">
+                <textarea name="" class="form-control-plaintext" readonly id="" cols="7" rows="4"
+                  v-model="e.description">
                 </textarea>
               </td>
               <td class="text-right">{{ e.price | currency }}</td>
@@ -103,10 +111,10 @@
                 </button>
               </td>
               <td class="text-right" v-if="$root.validatePermission('expense-delete')">
-                <button  class="btn btn-danger" @click="deleteExpense(e.id)">
+                <button class="btn btn-danger" @click="deleteExpense(e.id)">
                   <i class="bi bi-trash"></i>
                 </button>
-               
+
               </td>
               <td class="text-right" v-if="$root.validatePermission('expense-update')">
                 <button class="btn btn-success" @click="showData(e)">
@@ -143,6 +151,7 @@ export default {
       search_id: "",
       search_description: "",
       search_type_output: "",
+      search_type_movement: "",
       search_headquarter_id: 'all',
       search_results: 15,
       now: new Date().toISOString().slice(0, 10),
@@ -162,6 +171,7 @@ export default {
         from: this.search_from,
         to: this.search_to,
         type_output: this.search_type_output,
+        type_movement: this.search_type_movement,
         description: this.search_description,
         results: this.search_results,
         headquarter_id: this.search_headquarter_id

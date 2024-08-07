@@ -151,6 +151,7 @@ class CreditProviderController extends Controller
 
 		$expense->date = date('Y-m-d');
 		$expense->type_output = 'Pago a proveedor';
+		$expense->type_movement = 'EGRESO';
 		$expense->price = $request['amount'];
 		$expense->save();
 

@@ -17,7 +17,8 @@ class Expense extends Model
         'date',
         'type_output',
         'price',
-        'status'
+        'status',
+        'type_movement'
     ];
 
     protected $dates = [

@@ -19,6 +19,7 @@ class ExpenseFactory extends Factory
             'description' => $this->faker->text(100),
             'date' => $this->faker->date('Y-m-d'),
             'type_output' => $this->faker->text(50),
+            'type_movement' => $this->faker->text(50),
             'price' => $this->faker->randomNumber(),
         ];
     }

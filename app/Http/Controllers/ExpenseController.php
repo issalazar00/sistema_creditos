@@ -35,6 +35,7 @@ class ExpenseController extends Controller
 		$this_month = Carbon::now()->month;
 		$user_id = $request->user_id;
 		$type_output = $request->type_output;
+		$type_movement = $request->type_movement;
 		$description = $request->description;
 		$headquarter_id  = $request->headquarter_id;
 		$results = $request->results ?? 15;
@@ -61,6 +62,9 @@ class ExpenseController extends Controller
 		}
 		if ($type_output != null) {
 			$expenses =	$expenses->where('type_output', 'LIKE', "%$type_output%");
+		}
+		if ($type_movement != null) {
+			$expenses =	$expenses->where('type_movement', 'LIKE', "%$type_movement%");
 		}
 		if ($description != null) {
 			$expenses =	$expenses->where('description', 'LIKE', "%$description%");
@@ -103,6 +107,7 @@ class ExpenseController extends Controller
 			'description' => 'required|string|max:255',
 			'date' => 'required|date',
 			'type_output' => 'required|string|exists:type_expenses,description',
+			'type_movement' => 'required|string',
 			'price' => 'required|numeric',
 		]);
 
@@ -124,6 +129,7 @@ class ExpenseController extends Controller
 		$expense->description = $request['description'];
 		$expense->date = $request['date'];
 		$expense->type_output = $request['type_output'];
+		$expense->type_movement = $request['type_movement'];
 		$expense->price = $request['price'];
 		$expense->save();
 
@@ -152,6 +158,7 @@ class ExpenseController extends Controller
 			'description' => 'required|string|max:255',
 			'date' => 'required|date',
 			'type_output' => 'required|string|exists:type_expenses,description',
+			'type_movement' => 'required|string'
 		]);
 
 		if ($validate->fails()) {
@@ -166,6 +173,7 @@ class ExpenseController extends Controller
 		$expense->description = $request['description'];
 		$expense->date = $request['date'];
 		$expense->type_output = $request['type_output'];
+		$expense->type_movement = $request['type_movement'];
 		$expense->update();
 
 		return response()->json([
@@ -202,8 +210,11 @@ class ExpenseController extends Controller
 		return response()->json($data);
 	}
 
-	public function addExpense($user_id, $headquarter_id, $description, $date, $type_output, $price)
+	public function addExpense($user_id, $headquarter_id, $description, $date, $type_output, $price, $extras)
 	{
+		
+		$type_movement = isset($extras->type_movement) ? $extras->type_movement : "EGRESO";
+		
 		$expense =  new Expense();
 		$expense->headquarter_id = $headquarter_id;
 		$expense->user_id = $user_id;
@@ -211,6 +222,7 @@ class ExpenseController extends Controller
 		$expense->description = $description;
 		$expense->date = $date;
 		$expense->type_output = $type_output;
+		$expense->type_movement = $type_movement;
 		$expense->price = $price;
 		$expense->save();
 	}

@@ -35,6 +35,17 @@
             />
           </div>
           <div class="form-group col-12 col-md-3">
+            <label for="search_type_movement">Tipo de movimiento:</label>
+            <v-select
+              :options="['GASTO','EGRESO']"
+              label="search_type_movement"
+              aria-logname="{}"
+              v-model="search_type_movement"
+              placeholder="--Seleccionar--"
+            > </v-select>
+           
+          </div>
+          <div class="form-group col-12 col-md-3">
             <label for="search_type_output">Tipo de salida:</label>
             <input
               type="text"
@@ -109,7 +120,8 @@
               <th>ID</th>
               <th>Sede</th>
               <th>Fecha</th>
-							<th>Tipo</th>
+							<th>Tipo de movimiento</th>
+							<th>Tipo de salida</th>
 							<th>Afectación</th>
               <th>Valor</th>
             </tr>
@@ -124,6 +136,7 @@
 							<td>{{ r.id }}</td>
               <td>{{ r.headquarter.headquarter }}</td>
               <td> {{ r.date }} </td>
+							<td>{{ r.type_movement }}</td>
 							<td>{{ r.type_output }}</td>
 							<td>{{ r.description | affectation('expense') }}</td>
               <td class="text-right">{{ r.price | currency }}</td>
@@ -157,6 +170,7 @@ export default {
       search_from: "",
       search_to: "",
       search_type_output: "",
+      search_type_movement: "",
 			search_headquarter_id: "",
       search_user_id: "",
       now: moment().format('YYYY-MM-DD'),
@@ -169,7 +183,11 @@ export default {
 					field: "date",
 					callback: (value) => value
 				},
-				'Tipo': {
+				'Tipo de movimiento': {
+          field: 'type_movement',
+          callback: (value) => value
+        },
+        'Tipo de salida': {
           field: 'type_output',
           callback: (value) => value
         },
@@ -204,6 +222,7 @@ export default {
         to: this.search_to,
         user_id: this.search_user_id,
         type_output: this.search_type_output,
+        type_movement: this.search_type_movement,
 				headquarter_id: this.search_headquarter_id,
 				results: this.search_results
       }

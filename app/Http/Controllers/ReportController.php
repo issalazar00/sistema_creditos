@@ -226,6 +226,7 @@ class ReportController extends Controller
 		$to = $request->to;
 		$user_id = $request->user_id;
 		$type_output = $request->type_output;
+		$type_movement = $request->type_movement;
 		$headquarterId = $request->headquarter_id;
 
 		$expenses = Expense::where(function ($query) use ($this_month, $from, $to, $headquarterId) {
@@ -247,15 +248,21 @@ class ReportController extends Controller
 			if (!is_null($headquarterId) && $headquarterId != '') {
 				$query->where('headquarter_id', $headquarterId);
 			}
-		})->where(function ($query) use ($type_output) {
-			if ($type_output != '' && $type_output != 'undefined' && $type_output != null) {
-				$query->where('type_output', 'LIKE', "%$type_output%");
-			}
-		})->where(function ($query) use ($user_id) {
-			if ($user_id != '' && $user_id != 'undefined' && $user_id != null) {
-				$query->where('user_id', 'LIKE', "%$user_id%");
-			}
 		})
+			->where(function ($query) use ($type_output) {
+				if ($type_output != '' && $type_output != 'undefined' && $type_output != null) {
+					$query->where('type_output', 'LIKE', "%$type_output%");
+				}
+			})
+			->where(function ($query) use ($type_movement) {
+				if ($type_movement != '' && $type_movement != 'undefined' && $type_movement != null) {
+					$query->where('type_movement', 'LIKE', "%$type_movement%");
+				}
+			})->where(function ($query) use ($user_id) {
+				if ($user_id != '' && $user_id != 'undefined' && $user_id != null) {
+					$query->where('user_id', 'LIKE', "%$user_id%");
+				}
+			})
 			->with('headquarter');
 
 

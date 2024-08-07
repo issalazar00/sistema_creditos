@@ -158,9 +158,6 @@ class EntryController extends Controller
 	 */
 	public function update(Request $request, Entry $entry)
 	{
-		$credit = Credit::findOrFail($request->data['credit_id']);
-		$client = $credit->client()->first();
-
 		$validate = Validator::make($request->all(), [
 			'description' => 'required|string|max:255',
 			'date' => 'required|date',
@@ -178,7 +175,7 @@ class EntryController extends Controller
 
 		$entry->description = $request['description'];
 		$entry->date = $request['date'];
-		$entry->type_entry = $request['type_output'];
+		$entry->type_entry = $request['type_entry'];
 		$entry->update();
 
 		return response()->json([

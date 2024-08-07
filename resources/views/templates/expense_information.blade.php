@@ -23,7 +23,8 @@
         <p>Dirección: {{$headquarter->address}}</p>
         <p>Contacto: {{$headquarter->telephone ?? $headquarter->telephone ." ".  $headquarter->mobile ?? $headquarter->mobile }}</p>
         <br>
-        <h2><strong>{{ $expense->type_output}}</strong></h2>
+        <h2><strong>{{ $expense->type_movement}}</strong></h2>
+        <h3><strong>{{ $expense->type_output}}</strong></h3>
     </header>
     <section>
         <table class="table">

@@ -167,6 +167,8 @@ class PrintTicketController extends Controller
 			$printer->text("\n");
 			$printer->text(sprintf('%-20s %-20s', 'ID egreso: ', '# ' .  $expense->id));
 			$printer->text("\n");
+			$printer->text(sprintf('%-20s %-20s', 'Tipo de movimiento: ',  $expense->type_movement));
+			$printer->text("\n");
 			$printer->text(sprintf('%-20s %-20s', 'Tipo de egreso: ',  $expense->type_output));
 			$printer->text("\n");
 			$printer->text(sprintf('%-20s %-20s', 'Monto Cancelado: ', '$ ' .  $expense->price));

@@ -13,6 +13,23 @@
     </div>
     <form class="">
       <div class="modal-body">
+        <div class="form-row col-12">
+          <div class="form-group col-11">
+            <label for="type_movement">Seleccionar tipo de salida</label>
+            <v-select
+              :options="['GASTO','EGRESO']"
+              label="type_movement"
+              aria-logname="{}"
+              v-model="formExpense.type_movement"
+              placeholder="--Seleccionar--"
+            >
+            </v-select>
+            <small id="type_movement_help" class="form-text text-danger">{{
+              formErrors.type_movement
+            }}</small>
+          </div>
+          
+        </div>
         <div class="form-group col-12">
           <label for="description">Descripción</label>
           <input
@@ -130,6 +147,7 @@ export default {
         description: "",
         date: "",
         type_output: "",
+        type_movement: "",
         price: "",
       },
     };
