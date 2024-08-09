@@ -418,7 +418,8 @@ class CreditController extends Controller
 
 			if ($credit->initial_quota) {
 				$entry = new InstallmentController;
-				$entry->saveEntryInstallment($credit, $credit->initial_quota, $credit->initial_quota, 1, 0, $credit->user_id, 'Cuota inicial');
+				$extrasEntry = (object)[];
+				$entry->saveEntryInstallment($credit, $credit->initial_quota, $credit->initial_quota, 1, 0, $credit->user_id, 'Cuota inicial', $extrasEntry);
 
 				$user = User::find($credit->user_id);
 				$box = Box::where('headquarter_id', $user->headquarter_id)->firstOrFail();

@@ -233,7 +233,7 @@ class InstallmentController extends Controller
               $step = 17;
               $balance = $balance - $late_interest;
             }
-          }  else {
+          } else {
             if ((int) $balance >= (int)  $helpPendingInterest) {
               $interest =  $helpPendingInterest;
               $additional_interest =  $balance - $interest;
@@ -279,7 +279,11 @@ class InstallmentController extends Controller
         $interest
       );
       $totalPaid =  $capital + $interest + $late_interest + $additional_interest;
-      $entry_id =  $this->saveEntryInstallment($credit, $amount, $totalPaid, $no_installment, $balance, $user_id, $subject);
+      $extrasEntry = (object)[
+        'interest' => $interest,
+        'additional_interest' => $additional_interest
+      ];
+      $entry_id =  $this->saveEntryInstallment($credit, $amount, $totalPaid, $no_installment, $balance, $user_id, $subject,  $extrasEntry);
     }
 
     return [
@@ -388,7 +392,13 @@ class InstallmentController extends Controller
       $request->merge(['user_id' => $user_id]);
       $request->merge(['additional_interest' => $additional_interest]);
       $credit_paid->updateValuesCredit($request, $credit->id, $amount, $balance, $interest);
-      $entry_id =  $this->saveEntryInstallment($credit, $amount, $balance, $no_installment, $balance, $user_id, 'Abono a crédito');
+
+      $extrasEntry = (object)[
+        'interest' => $interest,
+        'additional_interest' => $additional_interest
+      ];
+
+      $entry_id =  $this->saveEntryInstallment($credit, $amount, $balance, $no_installment, $balance, $user_id, 'Abono a crédito', $extrasEntry);
     }
 
     if ($configurations->method &&  $configurations->method == "GENERAL") {
@@ -422,8 +432,10 @@ class InstallmentController extends Controller
     ];
   }
 
-  public function saveEntryInstallment(Credit $credit, $amount_receipt, $amount_paid, $no_installment, $balance,  $user_id, $quote = null)
+  public function saveEntryInstallment(Credit $credit, $amount_receipt, $amount_paid, $no_installment, $balance,  $user_id, $quote = null, $extras)
   {
+    $interest  = isset($extras->interest) ? '$' . number_format($extras->interest, 0, ',', '.') :  '$' . number_format($amount_receipt, 0, ',', '.');
+    $additional_interest  = isset($extras->additional_interest) ?  '$' . number_format($extras->additional_interest, 0, ',', '.') :  '$' . number_format($amount_receipt, 0, ',', '.');
     $amount = $amount_paid;
     $amount_receipt = '$' . number_format($amount_receipt, 0, ',', '.');
     $amount_paid = '$' . number_format($amount_paid, 0, ',', '.');
@@ -444,6 +456,8 @@ class InstallmentController extends Controller
           . "#cuota: {$no_installment}\n"
           . "Efectivo: {$amount_receipt}\n"
           . "Valor cancelado: {$amount_paid}\n"
+          . "Interés pagado: {$interest}\n"
+          . "Interés Cobro & Admin: {$additional_interest}\n"
           . "Cupo crédito: {$client->maximum_credit_allowed}";
         $entry->date = date('Y-m-d');
         $entry->type_entry = $type_entry;
@@ -521,7 +535,8 @@ class InstallmentController extends Controller
     //Datos para calculr valores
     $paid_balance = $installment->paid_balance;
     $paid_capital =  $installment->paid_capital;
-    $interest =  $installment->paid_balance - $installment->paid_capital;
+    $interest =  $installment->paid_balance - $installment->paid_capital - $installment->additional_interest_paid;
+    $additional_interest_paid =  $installment->additional_interest_paid;
     $credit = $installment->credit;
 
     $type_output = 'Reversar pago';
@@ -532,8 +547,11 @@ class InstallmentController extends Controller
       "Fecha y hora: " . date('Y-m-d h:i:s A');
 
     // Certificar egreso
+    $extrasExpense = (object) [
+      "type_movement" => "EGRESO"
+    ];
     $expense  = new ExpenseController();
-    $expense->addExpense($user_id, $headquarter_id, $description, date('Y-m-d'), $type_output, $paid_balance);
+    $expense->addExpense($user_id, $headquarter_id, $description, date('Y-m-d'), $type_output, $paid_balance, $extrasExpense);
 
     //Resetar valores de la cuota
     $installment->paid_balance = 0;
@@ -543,7 +561,7 @@ class InstallmentController extends Controller
 
     //Restar valores en el crédito
     $request->merge(['user_id' => $user_id]);
-    $request->merge(['additional_interest' => - $installment->additional_interest_paid]);
+    $request->merge(['additional_interest' => -$installment->additional_interest_paid]);
     $credit_paid = new CreditController;
     $credit_paid->updateValuesCredit($request, $credit->id, $paid_balance * -1,  $paid_capital * -1, $interest * -1, true);
 
